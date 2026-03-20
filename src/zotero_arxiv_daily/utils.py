@@ -8,9 +8,13 @@ from email.utils import parseaddr, formataddr
 from loguru import logger
 import datetime
 from omegaconf import DictConfig
+import pymupdf
 import pymupdf.layout
+pymupdf.TOOLS.mupdf_display_errors(False)
 pymupdf.layout.activate()
-import pymupdf4llm
+
+import pymupdf4llm  # noqa: E402
+
 def extract_tex_code_from_tar(file_path:str, paper_id:str) -> dict[str,str]:
     try:
         tar = tarfile.open(file_path)
@@ -58,7 +62,7 @@ def extract_tex_code_from_tar(file_path:str, paper_id:str) -> dict[str,str]:
         content = re.sub(r'\\\\', '', content)
         #remove consecutive spaces
         content = re.sub(r'[ \t\r\f]{3,}', ' ', content)
-        if main_tex is None and re.search(r'\\begin\{document\}', content):
+        if main_tex is None and re.search(r'\\begin\{document\}', content) and not any(w in t for w in ['example', 'sample']):
             main_tex = t
             logger.debug(f"Choose {t} as main tex file of {paper_id}")
         file_contents[t] = content
